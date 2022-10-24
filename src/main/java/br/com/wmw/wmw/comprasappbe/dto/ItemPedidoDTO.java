@@ -32,7 +32,13 @@ public class ItemPedidoDTO {
 		this.totalItem = itemPedido.getTotalItem();
 	}
 	
-	public ItemPedidoDTO() {
+	public ItemPedidoDTO(long id, long produto, double quantidade, double precoUnitario, double desconto, double total) {
+		this.id = id;
+		this.idProduto = produto;
+		this.quantidade = quantidade;
+		this.precoUnitario = precoUnitario;
+		this.desconto = desconto;
+		this.totalItem = total;
 		
 	}
 	

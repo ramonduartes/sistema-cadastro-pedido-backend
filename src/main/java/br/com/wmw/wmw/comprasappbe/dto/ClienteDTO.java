@@ -5,25 +5,37 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.hibernate.validator.constraints.br.CNPJ;
+import org.hibernate.validator.constraints.br.CPF;
+
 import br.com.wmw.wmw.comprasappbe.models.Cliente;
 import br.com.wmw.wmw.comprasappbe.models.TipoPessoa;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 
 public class ClienteDTO implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+
 	private Long id;
 
+	@NotBlank(message = "Insira o nome do Cliente")
 	private String nome;
 
+	@NotBlank(message = "Insira se é pessoa FISICA ou JURIDICA")
 	private TipoPessoa tipoPessoa;
 
-	
+	@CPF
+	@CNPJ
+	@NotBlank(message = "Insira o CPF ou CNPJ")
 	private String cnpj_cpf;
 
-	
+	@NotBlank(message = "Insira o telefone")
+	@Pattern(regexp = "(^$|[0-9]{10})")
 	private String telefone;
 
-	
+	@NotBlank(message = "Insira o email")
 	private String email;
 
 	public ClienteDTO(Cliente cliente) {

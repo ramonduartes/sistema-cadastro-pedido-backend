@@ -12,12 +12,10 @@ import br.com.wmw.wmw.comprasappbe.models.StatusPedido;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 @ToString
 public class PedidoDTO {
 	
@@ -63,19 +61,13 @@ public class PedidoDTO {
 		return codigoPedido;
 	}
 
-
-
 	public void setCodigoPedido(Long cod_pedido) {
 		this.codigoPedido = cod_pedido;
 	}
 
-
-
 	public Long getCodigoCliente() {
 		return codigoCliente;
 	}
-
-
 
 	public void setCodigoCliente(Long cod_cliente) {
 		this.codigoCliente = cod_cliente;
