@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import br.com.wmw.wmw.comprasappbe.dto.ItemPedidoDTO;
 import br.com.wmw.wmw.comprasappbe.dto.PedidoDTO;
-import br.com.wmw.wmw.comprasappbe.dto.PedidoUpdateDTO;
+import br.com.wmw.wmw.comprasappbe.exception.NotFoundException;
+import br.com.wmw.wmw.comprasappbe.exception.ValidationException;
 import br.com.wmw.wmw.comprasappbe.models.Cliente;
 import br.com.wmw.wmw.comprasappbe.models.ItemPedido;
 import br.com.wmw.wmw.comprasappbe.models.Pedido;
@@ -45,14 +46,17 @@ public class PedidoService {
 		if (pedido.isPresent()) {
 			return new PedidoDTO(pedido.get());
 		} else {
-			throw new Exception();
+			throw new NotFoundException("O pedido de código %d não foi encontrado");
 		}
 	}
 
 
 
 	public PedidoDTO cadastrar(PedidoDTO pedidoDTO) throws Exception {
-
+		
+		 if (calcularTotalDoPedido(pedidoDTO) != pedidoDTO.getTotalPedido()){
+			 throw new ValidationException("O total do pedido está diferente");
+	        }
 
 		Optional<Pedido> pedidoOptional = pedidoRepository.findById(pedidoDTO.getCodigoPedido());
 		if (pedidoOptional.isPresent()) {
@@ -77,8 +81,8 @@ public class PedidoService {
 		pedidoDTO.getItens().stream().forEach(item -> {
 			try {
 				double precoProduto = produtoRepository.getReferenceById(item.getIdProduto()).getPreco();
-				if (calcularDesconto(item, precoProduto).compareTo(item.getTotalItem()) != 0){
-					throw new Exception("O valor do item está diferente");
+				if (calcularDesconto(item, precoProduto) != item.getTotalItem()){
+					throw new ValidationException("O valor do item está diferente");
 				} else {
 					novoItemPedido(item, pedido);
 				}
@@ -106,46 +110,16 @@ public class PedidoService {
 		if (produto.isPresent()) {
 			itemPedido.setProduto(produto.get());
 		} else {
-			throw new Exception();
+			throw new ValidationException("Produto não encontrado");
 		}
 
 		pedido.getItens().add(itemPedido);
 	}
 
-	public Double calcularTotalDoPedido(PedidoDTO pedidoDTO){
+	public double calcularTotalDoPedido(PedidoDTO pedidoDTO){
 		return pedidoDTO.getItens().stream().mapToDouble(itemPedidoDTO -> itemPedidoDTO.getTotalItem()).sum();
 	}
 
-	public PedidoUpdateDTO atualizar(PedidoUpdateDTO pedidoUpdateDTO) throws Exception {
-
-        Optional<Pedido> pedidoOptional = pedidoRepository.findById(pedidoUpdateDTO.getId());
-        if (!pedidoOptional.isPresent()) {
-            throw new Exception();
-        }
-
-        Pedido pedido = pedidoOptional.get();
-
-        pedido.setId(pedidoUpdateDTO.getId());
-        pedido.setTotalPedido(pedidoUpdateDTO.getTotalPedido());
-        pedido.setDataEntrega(pedidoUpdateDTO.getDataEntrega());
-        pedido.setStatus(pedidoUpdateDTO.getStatus());
-
-
-        pedidoUpdateDTO.getItens().stream().forEach(item -> {
-            Optional<ItemPedido> itemOptional = itemRepository.findById(item.getId());
-            if (!itemOptional.isPresent()) {
-                try {
-                    novoItemPedido(item, pedido);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-
-        pedidoRepository.save(pedido);
-        pedidoUpdateDTO = new PedidoUpdateDTO(pedido);
-        return pedidoUpdateDTO;
-    }
 
 	public ResponseEntity<?> deletar(@PathVariable Long id) {
         Optional<Pedido> pedido = pedidoRepository.findById(id);
@@ -158,9 +132,10 @@ public class PedidoService {
     }
 
 
-	public Double calcularDesconto(ItemPedidoDTO itemPedidoDTO, double precoProduto){
+	public double calcularDesconto(ItemPedidoDTO itemPedidoDTO, double precoProduto){
 		double valorItemComDesconto = ((100 - itemPedidoDTO.getDesconto()) * 0.01) * precoProduto;
-		return valorItemComDesconto * itemPedidoDTO.getQuantidade();
+		double totalItemComDesconto = valorItemComDesconto * itemPedidoDTO.getQuantidade();
+		return Math.round(totalItemComDesconto * 100.0)/100.0;
 	}
 	
 	

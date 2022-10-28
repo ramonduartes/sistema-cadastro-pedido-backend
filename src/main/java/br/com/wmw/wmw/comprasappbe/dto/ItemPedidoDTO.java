@@ -21,7 +21,7 @@ public class ItemPedidoDTO {
 	private Double quantidade;
 	private Double precoUnitario;
 	private Double desconto;
-	private Double totalItem;
+	private double totalItem;
 	
 	public ItemPedidoDTO(ItemPedido itemPedido) {
 		this.id = itemPedido.getId();
@@ -76,10 +76,10 @@ public class ItemPedidoDTO {
 	public void setDesconto(Double desconto) {
 		this.desconto = desconto;
 	}
-	public Double getTotalItem() {
+	public double getTotalItem() {
 		return totalItem;
 	}
-	public void setTotalItem(Double totalItem) {
+	public void setTotalItem(double totalItem) {
 		this.totalItem = totalItem;
 	}
 	
